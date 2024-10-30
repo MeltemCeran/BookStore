@@ -10,16 +10,12 @@ namespace BookStore.WebApp.Controllers
     public class CityController : Controller
     {
         private readonly BookStoreDbContext _dbContext;
-        private MapperConfiguration _mapConfig;
         private IMapper _mapper;
-        public CityController(BookStoreDbContext dbContext)
+
+        public CityController(BookStoreDbContext dbContext, IMapper mapper)
         {
             _dbContext = dbContext;
-            _mapConfig = new MapperConfiguration(
-                cfg => cfg.CreateMap<CityViewModel, City>()
-                          .ForMember(dest=> dest.IsActive, opt=> opt.MapFrom(src=> src.Status))
-                          .ReverseMap());
-            _mapper = new Mapper(_mapConfig);
+            _mapper = mapper;
         }
 
         public IActionResult Index()
@@ -30,8 +26,8 @@ namespace BookStore.WebApp.Controllers
 
             return View(model);
         }
-
-        public IActionResult New()
+        [HttpGet]
+        public IActionResult Add()
         {
             CityViewModel model = new CityViewModel();
             return View(model);
@@ -46,6 +42,10 @@ namespace BookStore.WebApp.Controllers
 
             //BookStoreDbContext bookStoreDbContext = new BookStoreDbContext(); Eski bişiyler bunlar yenisini alta yazıcam
 
+            if (!ModelState.IsValid)
+                return View(model);
+    
+            
             City city= _mapper.Map<City>(model);
 
             _dbContext.Cities.Add(city);
